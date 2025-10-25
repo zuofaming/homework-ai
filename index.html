@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业辅导AI助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.3em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #666;
+            font-size: 0.95em;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .preview-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .preview-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .analyzing {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .analyzing-text {
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .result-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .result-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        
+        .error-item {
+            background: #fef2f2;
+            border-left: 5px solid #ef4444;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            color: #ef4444;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .error-content {
+            color: #333;
+            line-height: 1.8;
+        }
+        
+        .error-content strong {
+            color: #991b1b;
+        }
+        
+        .suggestion-box {
+            background: #ecfdf5;
+            border-left: 5px solid #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .suggestion-title {
+            color: #065f46;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .no-errors {
+            background: #ecfdf5;
+            border: 3px solid #10b981;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .no-errors h3 {
+            color: #10b981;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            white-space: pre-wrap;
+        }
+        
+        .api-key-section {
+            background: #fff7ed;
+            border: 2px solid #f59e0b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .api-key-section h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+        }
+        
+        .api-key-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #fcd34d;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+        
+        .api-key-hint {
+            color: #92400e;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+            
+            .upload-area {
+                padding: 40px 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 作业辅导AI助手</h1>
+            <p>拍照上传作业，AI帮你找错题、给建议</p>
+        </div>
+        
+        <div class="card">
+            <div class="api-key-section">
+                <h3>⚙️ 设置API密钥</h3>
+                <input type="password" 
+                       id="apiKeyInput" 
+                       class="api-key-input" 
+                       placeholder="请输入你的通义千问 API Key">
+                <div class="api-key-hint">
+                    💡 <strong>如何获取API Key：</strong><br>
+                    1. 访问 <a href="https://dashscope.aliyun.com/" target="_blank">dashscope.aliyun.com</a><br>
+                    2. 注册/登录阿里云账号<br>
+                    3. 在控制台创建 API Key<br>
+                    4. 复制粘贴到上面的框里
+                </div>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">点击上传作业照片</div>
+                <div class="upload-hint">或直接拖拽图片到这里<br>支持 JPG、PNG 格式</div>
+            </div>
+            
+            <input type="file" 
+                   id="fileInput" 
+                   accept="image/*">
+            
+            <div class="preview-section" id="previewSection">
+                <img id="previewImage" class="preview-image" alt="作业预览">
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="analyzeBtn">🔍 开始分析</button>
+                    <button class="btn btn-secondary" id="reuploadBtn">🔄 重新上传</button>
+                </div>
+            </div>
+            
+            <div class="analyzing" id="analyzing">
+                <div class="spinner"></div>
+                <div class="analyzing-text">AI正在认真分析作业中...</div>
+                <div style="color: #666; margin-top: 10px;">这可能需要10-30秒</div>
+            </div>
+            
+            <div class="result-section" id="resultSection">
+                <div class="result-header">
+                    <h2>✅ 分析完成！</h2>
+                    <p>以下是AI给出的诊断报告</p>
+                </div>
+                
+                <div id="resultContent"></div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="analyzeAgainBtn">📸 再拍一张</button>
+                </div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentImageBase64 = '';
+        let apiKey = localStorage.getItem('qwenApiKey') || '';
+        
+        // DOM元素
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const reuploadBtn = document.getElementById('reuploadBtn');
+        const analyzing = document.getElementById('analyzing');
+        const resultSection = document.getElementById('resultSection');
+        const resultContent = document.getElementById('resultContent');
+        const errorMessage = document.getElementById('errorMessage');
+        const analyzeAgainBtn = document.getElementById('analyzeAgainBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        
+        // 加载保存的API Key
+        if (apiKey) {
+            apiKeyInput.value = apiKey;
+        }
+        
+        // 保存API Key
+        apiKeyInput.addEventListener('change', () => {
+            apiKey = apiKeyInput.value.trim();
+            localStorage.setItem('qwenApiKey', apiKey);
+        });
+        
+        // 点击上传区域
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleImageUpload(file);
+            }
+        });
+        
+        // 文件选择
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageUpload(file);
+            }
+        });
+        
+        // 处理图片上传
+        function handleImageUpload(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImageBase64 = e.target.result;
+                previewImage.src = e.target.result;
+                uploadArea.style.display = 'none';
+                previewSection.style.display = 'block';
+                resultSection.style.display = 'none';
+                errorMessage.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 开始分析
+        analyzeBtn.addEventListener('click', async () => {
+            if (!apiKey) {
+                showError('请先输入你的通义千问 API Key！');
+                return;
+            }
+            
+            previewSection.style.display = 'none';
+            analyzing.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            try {
+                const result = await analyzeHomework(currentImageBase64);
+                displayResult(result);
+            } catch (error) {
+                console.error('分析错误:', error);
+                showError('分析出错了：\n' + error.message);
+                previewSection.style.display = 'block';
+            } finally {
+                analyzing.style.display = 'none';
+            }
+        });
+        
+        // 调用后端API分析作业
+        async function analyzeHomework(imageDataUrl) {
+            // 自动检测：本地开发用localhost，部署后用当前域名
+            const apiUrl = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000/api/analyze'
+                : '/api/analyze';
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    apiKey: apiKey,
+                    imageData: imageDataUrl
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `请求失败 (${response.status})`);
+            }
+            
+            const data = await response.json();
+            console.log('API响应:', data);
+            
+            // 检查是否有错误
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            let textContent = data.output.choices[0].message.content[0].text;
+            
+            // 去掉可能的markdown代码块标记
+            textContent = textContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            
+            // 尝试解析JSON
+            try {
+                return JSON.parse(textContent);
+            } catch (parseError) {
+                console.error('JSON解析错误:', parseError);
+                console.error('原始文本:', textContent);
+                
+                // 如果解析失败，返回一个友好的错误信息
+                return {
+                    totalQuestions: 0,
+                    correctCount: 0,
+                    errors: [{
+                        questionNumber: "分析结果",
+                        studentAnswer: "",
+                        issue: "AI返回的格式有问题，但这是它的回答：",
+                        correctAnswer: textContent.substring(0, 500),
+                        suggestion: "请尝试重新拍照，确保照片清晰"
+                    }],
+                    overallComment: "建议重新拍一张更清晰的照片哦！"
+                };
+            }
+        }
+        
+        // 显示分析结果
+        function displayResult(result) {
+            let html = '';
+            
+            // 统计数据
+            if (result.totalQuestions > 0) {
+                html += `
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-number">${result.totalQuestions}</div>
+                            <div class="stat-label">总题数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${result.correctCount}</div>
+                            <div class="stat-label">做对</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${result.errors.length}</div>
+                            <div class="stat-label">需要改进</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${Math.round(result.correctCount / result.totalQuestions * 100)}%</div>
+                            <div class="stat-label">正确率</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 错题详情
+            if (result.errors.length > 0) {
+                result.errors.forEach(error => {
+                    html += `
+                        <div class="error-item">
+                            <div class="error-title">${error.questionNumber}</div>
+                            <div class="error-content">
+                                ${error.studentAnswer ? `<p><strong>你的答案：</strong>${error.studentAnswer}</p>` : ''}
+                                <p><strong>问题：</strong>${error.issue}</p>
+                                ${error.correctAnswer ? `<p><strong>正确答案：</strong>${error.correctAnswer}</p>` : ''}
+                            </div>
+                            ${error.suggestion ? `
+                                <div class="suggestion-box">
+                                    <div class="suggestion-title">💡 建议</div>
+                                    <div>${error.suggestion}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            } else if (result.correctCount > 0) {
+                html += `
+                    <div class="no-errors">
+                        <h3>🎉 太棒了！</h3>
+                        <p style="font-size: 1.2em; margin-top: 10px;">所有题目都做对了！继续保持！</p>
+                    </div>
+                `;
+            }
+            
+            // 总体评价
+            if (result.overallComment) {
+                html += `
+                    <div style="background: #f0f9ff; border-left: 5px solid #3b82f6; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <div style="color: #1e40af; font-weight: bold; margin-bottom: 10px;">📝 老师的话</div>
+                        <div style="color: #333; line-height: 1.8;">${result.overallComment}</div>
+                    </div>
+                `;
+            }
+            
+            resultContent.innerHTML = html;
+            resultSection.style.display = 'block';
+        }
+        
+        // 显示错误
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        // 重新上传
+        reuploadBtn.addEventListener('click', () => {
+            previewSection.style.display = 'none';
+            uploadArea.style.display = 'block';
+            fileInput.value = '';
+            errorMessage.style.display = 'none';
+        });
+        
+        // 再次分析
+        analyzeAgainBtn.addEventListener('click', () => {
+            resultSection.style.display = 'none';
+            uploadArea.style.display = 'block';
+            fileInput.value = '';
+            errorMessage.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
