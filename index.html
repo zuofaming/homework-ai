@@ -3,318 +3,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作业辅导AI助手</title>
+    <title>作业辅导AI助手 - 智能学情诊断</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: var(--bg-gradient);
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
-        
+
         .header {
             text-align: center;
             color: white;
             margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
         }
-        
+
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.8em;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
-        
+
         .header p {
             font-size: 1.2em;
-            opacity: 0.9;
+            opacity: 0.95;
         }
-        
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 30px;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary-color);
+            border-color: white;
+        }
+
         .card {
             background: white;
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: var(--card-shadow);
             margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease-out;
         }
-        
+
         .upload-area {
-            border: 3px dashed #667eea;
+            border: 3px dashed var(--primary-color);
             border-radius: 15px;
             padding: 60px 40px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f9ff;
+            transition: var(--transition);
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .upload-area:hover::before {
+            opacity: 1;
+        }
+
         .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f1ff;
-            transform: translateY(-2px);
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
         }
-        
+
         .upload-area.dragover {
-            border-color: #10b981;
-            background: #ecfdf5;
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
         }
-        
+
         .upload-icon {
-            font-size: 4em;
+            font-size: 5em;
             margin-bottom: 20px;
+            animation: bounce 2s infinite;
         }
-        
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         .upload-text {
-            font-size: 1.3em;
-            color: #667eea;
+            font-size: 1.4em;
+            color: var(--primary-color);
             font-weight: bold;
             margin-bottom: 10px;
         }
-        
+
         .upload-hint {
             color: #666;
-            font-size: 0.95em;
+            font-size: 1em;
+            line-height: 1.8;
         }
-        
+
         #fileInput {
             display: none;
         }
-        
+
         .preview-section {
             display: none;
             margin-top: 30px;
         }
-        
+
         .preview-image {
             width: 100%;
+            max-height: 500px;
+            object-fit: contain;
             border-radius: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
-        
+
         .analyzing {
             text-align: center;
-            padding: 40px;
+            padding: 60px 40px;
             display: none;
         }
-        
+
         .spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
+            border: 5px solid #f3f4f6;
+            border-top: 5px solid var(--primary-color);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .analyzing-text {
-            color: #667eea;
-            font-size: 1.2em;
+            color: var(--primary-color);
+            font-size: 1.4em;
             font-weight: bold;
+            margin-bottom: 10px;
         }
-        
+
         .result-section {
             display: none;
             margin-top: 30px;
         }
-        
+
         .result-header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
             color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
             text-align: center;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         }
-        
+
         .result-header h2 {
-            font-size: 1.8em;
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%);
+            padding: 25px 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary-color);
             margin-bottom: 5px;
         }
-        
-        .error-item {
-            background: #fef2f2;
-            border-left: 5px solid #ef4444;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95em;
         }
-        
-        .error-title {
-            color: #ef4444;
+
+        .diagnosis-section {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 3px solid var(--warning-color);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+        }
+
+        .diagnosis-title {
+            color: #92400e;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diagnosis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .diagnosis-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--info-color);
+        }
+
+        .diagnosis-box.strengths {
+            border-left-color: var(--success-color);
+        }
+
+        .diagnosis-box.weaknesses {
+            border-left-color: var(--error-color);
+        }
+
+        .diagnosis-box.suggestions {
+            border-left-color: var(--info-color);
+        }
+
+        .diagnosis-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .diagnosis-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .diagnosis-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+        }
+
+        .diagnosis-box li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .diagnosis-box.weaknesses li::before {
+            content: '!';
+            color: var(--error-color);
+        }
+
+        .diagnosis-box.suggestions li::before {
+            content: '→';
+            color: var(--info-color);
+        }
+
+        .mastery-level {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .mastery-badge {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 50px;
             font-size: 1.3em;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-top: 10px;
         }
-        
+
+        .mastery-excellent {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .mastery-good {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .mastery-average {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .mastery-needwork {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .error-item {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-left: 5px solid var(--error-color);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .error-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+        }
+
+        .error-title {
+            color: var(--error-color);
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .error-content {
             color: #333;
-            line-height: 1.8;
+            line-height: 1.9;
+            margin-bottom: 15px;
         }
-        
+
+        .error-content p {
+            margin: 10px 0;
+        }
+
         .error-content strong {
             color: #991b1b;
         }
-        
+
+        .knowledge-tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px 5px 5px 0;
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .difficulty-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .difficulty-hard {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
         .suggestion-box {
-            background: #ecfdf5;
-            border-left: 5px solid #10b981;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-left: 5px solid var(--success-color);
+            padding: 18px;
+            border-radius: 10px;
             margin-top: 15px;
         }
-        
+
         .suggestion-title {
             color: #065f46;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
-        
+
         .no-errors {
-            background: #ecfdf5;
-            border: 3px solid #10b981;
-            padding: 30px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 3px solid var(--success-color);
+            padding: 40px;
+            border-radius: 15px;
             text-align: center;
         }
-        
+
         .no-errors h3 {
-            color: #10b981;
-            font-size: 1.8em;
-            margin-bottom: 10px;
+            color: var(--success-color);
+            font-size: 2em;
+            margin-bottom: 15px;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 15px;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
-        
+
         .btn {
             flex: 1;
-            padding: 15px 30px;
+            min-width: 150px;
+            padding: 16px 32px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
         }
-        
+
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn-secondary {
-            background: #f3f4f6;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             color: #374151;
         }
-        
+
         .btn-secondary:hover {
-            background: #e5e7eb;
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            transform: translateY(-2px);
         }
-        
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
         .error-message {
-            background: #fef2f2;
-            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 3px solid var(--error-color);
             color: #991b1b;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 12px;
             margin-top: 20px;
             display: none;
             white-space: pre-wrap;
+            line-height: 1.8;
         }
-        
+
         .api-key-section {
-            background: #fff7ed;
-            border: 2px solid #f59e0b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 3px solid var(--warning-color);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
         }
-        
+
         .api-key-section h3 {
             color: #92400e;
             margin-bottom: 15px;
+            font-size: 1.3em;
         }
-        
+
         .api-key-input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid #fcd34d;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1em;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            transition: var(--transition);
         }
-        
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
         .api-key-hint {
             color: #92400e;
-            font-size: 0.9em;
-            line-height: 1.6;
+            font-size: 0.95em;
+            line-height: 1.8;
         }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .stat-card {
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 2em;
+
+        .api-key-hint a {
+            color: var(--info-color);
+            text-decoration: none;
             font-weight: bold;
-            color: #667eea;
         }
-        
-        .stat-label {
+
+        .api-key-hint a:hover {
+            text-decoration: underline;
+        }
+
+        .overall-comment {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 5px solid var(--info-color);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+        }
+
+        .overall-comment-title {
+            color: #1e40af;
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+
+        .overall-comment-text {
+            color: #333;
+            line-height: 1.9;
+            font-size: 1.05em;
+        }
+
+        .history-section {
+            display: none;
+        }
+
+        .history-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .history-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-date {
             color: #666;
             font-size: 0.9em;
-            margin-top: 5px;
         }
-        
+
+        .history-stats {
+            display: flex;
+            gap: 20px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-history-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2em;
             }
-            
+
             .card {
                 padding: 25px;
             }
-            
+
             .upload-area {
                 padding: 40px 20px;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .diagnosis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -323,63 +722,84 @@
     <div class="container">
         <div class="header">
             <h1>📚 作业辅导AI助手</h1>
-            <p>拍照上传作业，AI帮你找错题、给建议</p>
+            <p>拍照上传作业，AI智能诊断学情，生成专业辅导报告</p>
         </div>
-        
-        <div class="card">
+
+        <div class="tabs">
+            <button class="tab active" data-tab="analyze">智能分析</button>
+            <button class="tab" data-tab="history">历史记录</button>
+        </div>
+
+        <div class="card" id="analyzeTab">
             <div class="api-key-section">
                 <h3>⚙️ 设置API密钥</h3>
-                <input type="password" 
-                       id="apiKeyInput" 
-                       class="api-key-input" 
+                <input type="password"
+                       id="apiKeyInput"
+                       class="api-key-input"
                        placeholder="请输入你的通义千问 API Key">
                 <div class="api-key-hint">
                     💡 <strong>如何获取API Key：</strong><br>
                     1. 访问 <a href="https://dashscope.aliyun.com/" target="_blank">dashscope.aliyun.com</a><br>
                     2. 注册/登录阿里云账号<br>
                     3. 在控制台创建 API Key<br>
-                    4. 复制粘贴到上面的框里
+                    4. 复制粘贴到上面的框里（自动保存）
                 </div>
             </div>
-            
+
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon">📸</div>
                 <div class="upload-text">点击上传作业照片</div>
-                <div class="upload-hint">或直接拖拽图片到这里<br>支持 JPG、PNG 格式</div>
+                <div class="upload-hint">
+                    或直接拖拽图片到这里<br>
+                    支持 JPG、PNG 格式<br>
+                    建议图片大小不超过 5MB
+                </div>
             </div>
-            
-            <input type="file" 
-                   id="fileInput" 
-                   accept="image/*">
-            
+
+            <input type="file"
+                   id="fileInput"
+                   accept="image/jpeg,image/png,image/jpg">
+
             <div class="preview-section" id="previewSection">
                 <img id="previewImage" class="preview-image" alt="作业预览">
                 <div class="action-buttons">
-                    <button class="btn btn-primary" id="analyzeBtn">🔍 开始分析</button>
+                    <button class="btn btn-primary" id="analyzeBtn">🔍 开始智能分析</button>
                     <button class="btn btn-secondary" id="reuploadBtn">🔄 重新上传</button>
                 </div>
             </div>
-            
+
             <div class="analyzing" id="analyzing">
                 <div class="spinner"></div>
                 <div class="analyzing-text">AI正在认真分析作业中...</div>
-                <div style="color: #666; margin-top: 10px;">这可能需要10-30秒</div>
+                <div style="color: #666; margin-top: 10px;">正在进行深度学情诊断，请稍候...</div>
             </div>
-            
+
             <div class="result-section" id="resultSection">
                 <div class="result-header">
-                    <h2>✅ 分析完成！</h2>
-                    <p>以下是AI给出的诊断报告</p>
+                    <h2>✅ 智能诊断完成！</h2>
+                    <p>以下是AI生成的详细学情诊断报告</p>
                 </div>
-                
+
                 <div id="resultContent"></div>
-                
+
                 <div class="action-buttons">
-                    <button class="btn btn-primary" id="analyzeAgainBtn">📸 再拍一张</button>
+                    <button class="btn btn-success" id="exportBtn">📄 导出报告</button>
+                    <button class="btn btn-primary" id="analyzeAgainBtn">📸 分析新作业</button>
                 </div>
             </div>
-            
+
             <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="card history-section" id="historyTab">
+            <h2 style="margin-bottom: 20px; color: #333;">📊 历史分析记录</h2>
+            <div id="historyContent">
+                <div class="empty-history">
+                    <div class="empty-history-icon">📭</div>
+                    <p style="font-size: 1.2em;">还没有分析记录</p>
+                    <p style="margin-top: 10px; color: #999;">上传作业照片开始使用吧！</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -387,7 +807,8 @@
         // 全局变量
         let currentImageBase64 = '';
         let apiKey = localStorage.getItem('qwenApiKey') || '';
-        
+        let analysisHistory = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+
         // DOM元素
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -401,42 +822,67 @@
         const errorMessage = document.getElementById('errorMessage');
         const analyzeAgainBtn = document.getElementById('analyzeAgainBtn');
         const apiKeyInput = document.getElementById('apiKeyInput');
-        
+        const exportBtn = document.getElementById('exportBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const analyzeTab = document.getElementById('analyzeTab');
+        const historyTab = document.getElementById('historyTab');
+        const historyContent = document.getElementById('historyContent');
+
         // 加载保存的API Key
         if (apiKey) {
             apiKeyInput.value = apiKey;
         }
-        
+
         // 保存API Key
-        apiKeyInput.addEventListener('change', () => {
+        apiKeyInput.addEventListener('input', () => {
             apiKey = apiKeyInput.value.trim();
             localStorage.setItem('qwenApiKey', apiKey);
         });
-        
+
+        // Tab切换
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                if (tabName === 'analyze') {
+                    analyzeTab.style.display = 'block';
+                    historyTab.style.display = 'none';
+                } else if (tabName === 'history') {
+                    analyzeTab.style.display = 'none';
+                    historyTab.style.display = 'block';
+                    renderHistory();
+                }
+            });
+        });
+
         // 点击上传区域
         uploadArea.addEventListener('click', () => {
             fileInput.click();
         });
-        
+
         // 拖拽上传
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
         });
-        
+
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.classList.remove('dragover');
         });
-        
+
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 handleImageUpload(file);
+            } else {
+                showError('请上传图片文件（JPG、PNG格式）');
             }
         });
-        
+
         // 文件选择
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -444,9 +890,22 @@
                 handleImageUpload(file);
             }
         });
-        
+
         // 处理图片上传
         function handleImageUpload(file) {
+            // 验证文件类型
+            if (!file.type.match('image/(jpeg|png|jpg)')) {
+                showError('只支持 JPG、PNG 格式的图片！');
+                return;
+            }
+
+            // 验证文件大小 (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showError('图片大小不能超过 5MB！\n当前大小：' + (file.size / 1024 / 1024).toFixed(2) + 'MB');
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 currentImageBase64 = e.target.result;
@@ -456,39 +915,43 @@
                 resultSection.style.display = 'none';
                 errorMessage.style.display = 'none';
             };
+            reader.onerror = () => {
+                showError('图片读取失败，请重试！');
+            };
             reader.readAsDataURL(file);
         }
-        
+
         // 开始分析
         analyzeBtn.addEventListener('click', async () => {
             if (!apiKey) {
                 showError('请先输入你的通义千问 API Key！');
+                apiKeyInput.focus();
                 return;
             }
-            
+
             previewSection.style.display = 'none';
             analyzing.style.display = 'block';
             errorMessage.style.display = 'none';
-            
+
             try {
                 const result = await analyzeHomework(currentImageBase64);
                 displayResult(result);
+                saveToHistory(result);
             } catch (error) {
                 console.error('分析错误:', error);
-                showError('分析出错了：\n' + error.message);
+                showError('分析出错了：\n' + error.message + '\n\n请检查网络连接和API Key是否正确。');
                 previewSection.style.display = 'block';
             } finally {
                 analyzing.style.display = 'none';
             }
         });
-        
+
         // 调用后端API分析作业
         async function analyzeHomework(imageDataUrl) {
-            // 自动检测：本地开发用localhost，部署后用当前域名
-            const apiUrl = window.location.hostname === 'localhost' 
+            const apiUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:3000/api/analyze'
                 : '/api/analyze';
-            
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -499,54 +962,63 @@
                     imageData: imageDataUrl
                 })
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.error || `请求失败 (${response.status})`);
             }
-            
+
             const data = await response.json();
             console.log('API响应:', data);
-            
-            // 检查是否有错误
+
             if (data.error) {
                 throw new Error(data.error);
             }
-            
+
             let textContent = data.output.choices[0].message.content[0].text;
-            
-            // 去掉可能的markdown代码块标记
             textContent = textContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            
-            // 尝试解析JSON
+
             try {
-                return JSON.parse(textContent);
+                const parsedResult = JSON.parse(textContent);
+                parsedResult.timestamp = Date.now();
+                parsedResult.imageData = imageDataUrl;
+                return parsedResult;
             } catch (parseError) {
                 console.error('JSON解析错误:', parseError);
                 console.error('原始文本:', textContent);
-                
-                // 如果解析失败，返回一个友好的错误信息
+
                 return {
                     totalQuestions: 0,
                     correctCount: 0,
                     errors: [{
-                        questionNumber: "分析结果",
+                        questionNumber: "解析错误",
                         studentAnswer: "",
-                        issue: "AI返回的格式有问题，但这是它的回答：",
-                        correctAnswer: textContent.substring(0, 500),
-                        suggestion: "请尝试重新拍照，确保照片清晰"
+                        issue: "AI返回的数据格式有问题",
+                        correctAnswer: "",
+                        suggestion: "请尝试重新拍照，确保照片清晰、光线充足",
+                        knowledgePoint: "未知",
+                        difficulty: "未知"
                     }],
-                    overallComment: "建议重新拍一张更清晰的照片哦！"
+                    overallComment: "建议重新拍一张更清晰的照片！",
+                    learningDiagnosis: {
+                        strengths: ["需要重新分析"],
+                        weaknesses: ["图片质量可能不够清晰"],
+                        suggestions: ["确保照片清晰、光线充足", "避免反光和阴影"],
+                        masteryLevel: "需加强"
+                    },
+                    timestamp: Date.now(),
+                    imageData: imageDataUrl
                 };
             }
         }
-        
+
         // 显示分析结果
         function displayResult(result) {
             let html = '';
-            
+
             // 统计数据
             if (result.totalQuestions > 0) {
+                const accuracy = Math.round(result.correctCount / result.totalQuestions * 100);
                 html += `
                     <div class="stats">
                         <div class="stat-card">
@@ -559,65 +1031,223 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-number">${result.errors.length}</div>
-                            <div class="stat-label">需要改进</div>
+                            <div class="stat-label">需改进</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number">${Math.round(result.correctCount / result.totalQuestions * 100)}%</div>
+                            <div class="stat-number">${accuracy}%</div>
                             <div class="stat-label">正确率</div>
                         </div>
                     </div>
                 `;
             }
-            
+
+            // 学情诊断报告
+            if (result.learningDiagnosis) {
+                const diagnosis = result.learningDiagnosis;
+                const masteryClass = diagnosis.masteryLevel === '优秀' ? 'excellent' :
+                                   diagnosis.masteryLevel === '良好' ? 'good' :
+                                   diagnosis.masteryLevel === '一般' ? 'average' : 'needwork';
+
+                html += `
+                    <div class="diagnosis-section">
+                        <div class="diagnosis-title">
+                            📊 学情诊断报告
+                        </div>
+
+                        <div class="mastery-level">
+                            <div style="color: #666; margin-bottom: 10px;">整体掌握程度</div>
+                            <div class="mastery-badge mastery-${masteryClass}">
+                                ${diagnosis.masteryLevel}
+                            </div>
+                        </div>
+
+                        <div class="diagnosis-grid">
+                            ${diagnosis.strengths && diagnosis.strengths.length > 0 ? `
+                                <div class="diagnosis-box strengths">
+                                    <h4>✨ 优势方面</h4>
+                                    <ul>
+                                        ${diagnosis.strengths.map(s => `<li>${s}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+
+                            ${diagnosis.weaknesses && diagnosis.weaknesses.length > 0 ? `
+                                <div class="diagnosis-box weaknesses">
+                                    <h4>⚠️ 需要加强</h4>
+                                    <ul>
+                                        ${diagnosis.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+
+                            ${diagnosis.suggestions && diagnosis.suggestions.length > 0 ? `
+                                <div class="diagnosis-box suggestions">
+                                    <h4>💡 学习建议</h4>
+                                    <ul>
+                                        ${diagnosis.suggestions.map(s => `<li>${s}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
             // 错题详情
             if (result.errors.length > 0) {
-                result.errors.forEach(error => {
+                html += '<div style="margin-top: 30px;"><h3 style="color: #333; margin-bottom: 20px;">📝 错题详情分析</h3>';
+
+                result.errors.forEach((error, index) => {
+                    const difficultyClass = error.difficulty === '简单' ? 'easy' :
+                                          error.difficulty === '中等' ? 'medium' : 'hard';
+
                     html += `
                         <div class="error-item">
-                            <div class="error-title">${error.questionNumber}</div>
+                            <div class="error-title">
+                                <span>❌ ${error.questionNumber}</span>
+                            </div>
                             <div class="error-content">
                                 ${error.studentAnswer ? `<p><strong>你的答案：</strong>${error.studentAnswer}</p>` : ''}
-                                <p><strong>问题：</strong>${error.issue}</p>
+                                <p><strong>问题分析：</strong>${error.issue}</p>
                                 ${error.correctAnswer ? `<p><strong>正确答案：</strong>${error.correctAnswer}</p>` : ''}
+                                ${error.knowledgePoint ? `
+                                    <div style="margin-top: 10px;">
+                                        <span class="knowledge-tag">知识点：${error.knowledgePoint}</span>
+                                        ${error.difficulty ? `<span class="difficulty-tag difficulty-${difficultyClass}">难度：${error.difficulty}</span>` : ''}
+                                    </div>
+                                ` : ''}
                             </div>
                             ${error.suggestion ? `
                                 <div class="suggestion-box">
-                                    <div class="suggestion-title">💡 建议</div>
+                                    <div class="suggestion-title">💡 改进建议</div>
                                     <div>${error.suggestion}</div>
                                 </div>
                             ` : ''}
                         </div>
                     `;
                 });
+
+                html += '</div>';
             } else if (result.correctCount > 0) {
                 html += `
                     <div class="no-errors">
-                        <h3>🎉 太棒了！</h3>
-                        <p style="font-size: 1.2em; margin-top: 10px;">所有题目都做对了！继续保持！</p>
+                        <h3>🎉 太棒了！全部正确！</h3>
+                        <p style="font-size: 1.3em; margin-top: 15px; color: #059669;">所有题目都做对了！继续保持这个水平！</p>
                     </div>
                 `;
             }
-            
+
             // 总体评价
             if (result.overallComment) {
                 html += `
-                    <div style="background: #f0f9ff; border-left: 5px solid #3b82f6; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                        <div style="color: #1e40af; font-weight: bold; margin-bottom: 10px;">📝 老师的话</div>
-                        <div style="color: #333; line-height: 1.8;">${result.overallComment}</div>
+                    <div class="overall-comment">
+                        <div class="overall-comment-title">👩‍🏫 老师的话</div>
+                        <div class="overall-comment-text">${result.overallComment}</div>
                     </div>
                 `;
             }
-            
+
             resultContent.innerHTML = html;
             resultSection.style.display = 'block';
         }
-        
+
+        // 保存到历史记录
+        function saveToHistory(result) {
+            analysisHistory.unshift({
+                ...result,
+                id: Date.now()
+            });
+
+            // 只保留最近20条记录
+            if (analysisHistory.length > 20) {
+                analysisHistory = analysisHistory.slice(0, 20);
+            }
+
+            localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+        }
+
+        // 渲染历史记录
+        function renderHistory() {
+            if (analysisHistory.length === 0) {
+                historyContent.innerHTML = `
+                    <div class="empty-history">
+                        <div class="empty-history-icon">📭</div>
+                        <p style="font-size: 1.2em;">还没有分析记录</p>
+                        <p style="margin-top: 10px; color: #999;">上传作业照片开始使用吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            analysisHistory.forEach(item => {
+                const date = new Date(item.timestamp);
+                const dateStr = date.toLocaleString('zh-CN');
+                const accuracy = item.totalQuestions > 0
+                    ? Math.round(item.correctCount / item.totalQuestions * 100)
+                    : 0;
+
+                html += `
+                    <div class="history-item" data-id="${item.id}">
+                        <div class="history-header">
+                            <div class="history-date">📅 ${dateStr}</div>
+                            <div style="color: ${accuracy >= 80 ? '#10b981' : accuracy >= 60 ? '#f59e0b' : '#ef4444'}; font-weight: bold;">
+                                ${accuracy}%
+                            </div>
+                        </div>
+                        <div class="history-stats">
+                            <span>📊 总题数：${item.totalQuestions}</span>
+                            <span>✅ 正确：${item.correctCount}</span>
+                            <span>❌ 错误：${item.errors.length}</span>
+                        </div>
+                        ${item.learningDiagnosis ? `
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb; color: #666; font-size: 0.9em;">
+                                掌握程度：${item.learningDiagnosis.masteryLevel}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            historyContent.innerHTML = html;
+
+            // 添加点击事件
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = parseInt(item.dataset.id);
+                    const record = analysisHistory.find(r => r.id === id);
+                    if (record) {
+                        displayResult(record);
+                        tabs[0].click(); // 切换到分析标签
+                        resultSection.style.display = 'block';
+                        uploadArea.style.display = 'none';
+                        previewSection.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // 导出报告
+        exportBtn.addEventListener('click', () => {
+            const content = resultContent.innerText;
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `学情诊断报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
         // 显示错误
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 8000);
         }
-        
+
         // 重新上传
         reuploadBtn.addEventListener('click', () => {
             previewSection.style.display = 'none';
@@ -625,7 +1255,7 @@
             fileInput.value = '';
             errorMessage.style.display = 'none';
         });
-        
+
         // 再次分析
         analyzeAgainBtn.addEventListener('click', () => {
             resultSection.style.display = 'none';
