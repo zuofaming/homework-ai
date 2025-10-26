@@ -39,7 +39,6 @@ tmp/
 temp/
 *.tmp
 
-# Old files
-index.html
-vercel.json
-package.json
+# Old files (仅忽略根目录的旧文件)
+/index.html
+/vercel.json
