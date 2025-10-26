@@ -1,23 +1,25 @@
 {
   "name": "homework-ai",
-  "version": "1.0.0",
-  "description": "AI作业辅导助手 - 拍照分析作业，生成学情诊断报告",
-  "main": "index.html",
+  "version": "2.0.0",
+  "description": "作业AI助手 - React + Node.js 完整方案",
+  "main": "server/server.js",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'No build step required'",
-    "deploy": "vercel --prod"
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build"
   },
   "keywords": [
     "homework",
     "ai",
     "education",
-    "qwen",
-    "vercel"
+    "react",
+    "nodejs"
   ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "vercel": "^33.0.0"
+    "concurrently": "^8.2.2"
   }
 }

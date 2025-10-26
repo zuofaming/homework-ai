@@ -1,0 +1,413 @@
+.result-container {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.result-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.result-header h2 {
+  font-size: 2em;
+  margin-bottom: 8px;
+}
+
+/* 统计卡片 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%);
+  padding: 25px 20px;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.stat-number {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.95em;
+}
+
+/* 学习分析 */
+.learning-analysis {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 3px solid #f59e0b;
+  padding: 25px;
+  border-radius: 15px;
+  margin: 25px 0;
+}
+
+.learning-analysis h3 {
+  color: #92400e;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.analysis-box {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 5px solid #3b82f6;
+}
+
+.analysis-box.strengths {
+  border-left-color: #10b981;
+}
+
+.analysis-box.weaknesses {
+  border-left-color: #ef4444;
+}
+
+.analysis-box h4 {
+  font-size: 1.2em;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.analysis-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.analysis-box li {
+  padding: 8px 0;
+  padding-left: 25px;
+  position: relative;
+  color: #555;
+}
+
+.analysis-box li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.analysis-box.weaknesses li::before {
+  content: '!';
+  color: #ef4444;
+}
+
+/* 错题区域 */
+.errors-section {
+  margin: 30px 0;
+}
+
+.errors-section h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.error-card {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-left: 5px solid #ef4444;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.error-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+}
+
+.error-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.error-number {
+  color: #ef4444;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.difficulty-tag {
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+}
+
+.difficulty-easy {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.difficulty-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.difficulty-hard {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.error-field {
+  margin: 10px 0;
+  color: #333;
+  line-height: 1.8;
+}
+
+.error-field strong {
+  color: #991b1b;
+}
+
+.error-field.correct strong {
+  color: #065f46;
+}
+
+.knowledge-tag {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  margin: 10px 0;
+}
+
+.suggestion-box {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left: 5px solid #10b981;
+  padding: 18px;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.suggestion-title {
+  color: #065f46;
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+/* 无错题 */
+.no-errors {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 3px solid #10b981;
+  padding: 40px;
+  border-radius: 15px;
+  text-align: center;
+  margin: 30px 0;
+}
+
+.no-errors h3 {
+  color: #10b981;
+  font-size: 2em;
+  margin-bottom: 15px;
+}
+
+.no-errors p {
+  color: #059669;
+  font-size: 1.3em;
+}
+
+/* 总体评价 */
+.overall-comment {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-left: 5px solid #3b82f6;
+  padding: 25px;
+  border-radius: 12px;
+  margin: 25px 0;
+}
+
+.comment-title {
+  color: #1e40af;
+  font-weight: bold;
+  margin-bottom: 12px;
+  font-size: 1.2em;
+}
+
+.comment-text {
+  color: #333;
+  line-height: 1.9;
+  font-size: 1.05em;
+}
+
+/* 学习建议 */
+.study-tips {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #3b82f6;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 25px 0;
+}
+
+.study-tips h4 {
+  color: #1e40af;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.study-tips ul {
+  list-style: none;
+  padding: 0;
+}
+
+.study-tips li {
+  padding: 8px 0;
+  padding-left: 25px;
+  position: relative;
+  color: #1e40af;
+}
+
+.study-tips li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+/* 操作区域 */
+.action-section {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.name-input-section {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+
+.name-input {
+  flex: 1;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1em;
+}
+
+.name-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn {
+  flex: 1;
+  min-width: 150px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  transform: translateY(-2px);
+}
+
+.error-message {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 3px solid #ef4444;
+  color: #991b1b;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .result-container {
+    padding: 25px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-section {
+    flex-direction: column;
+  }
+
+  .name-input-section {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
